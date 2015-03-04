@@ -1,32 +1,34 @@
 $(function(){
     $('#generate').click(function(){
         var username = $('#username').val();
-        generate(username);
+        generate(username, undefined, render);
     });
 
-    var generate = function(username, max_id){
+    var generate = function(username, max_id, callback){
         var url = '/tweets/'+username;
-        if(arguments.length > 1){
+        if(max_id !== undefined){
             url = url+'?max_id=' + max_id;
         }
         $.get(url, function(data){
-            render(data);
+            callback(data);
         });
 
     };
     var parseTweets = function(tweets){
+        var num=0;
         var dates = {};
         if (tweets.length > 0) {
             $.each(tweets, function(count, tweet){
                 var date = (new Date(tweet.created_at)).getTime();
                 date = (date/1000).toString();
                 dates[date] = 1;
+                num++;
             });
         }
+        console.log(num);
         return dates;
-    }
+    };
     var render = function(tweets){;
-        var dates = parseTweets(tweets);
         $('#tweet-heatmap').empty();
         var cal = new CalHeatMap();
         var first_id = tweets[tweets.length-1].id;
@@ -34,7 +36,8 @@ $(function(){
         var today = new Date();
         cal.init({
             itemSelector: '#tweet-heatmap',
-            data: dates,
+            data: tweets,
+            afterLoadData: parseTweets,
             start: firstDate,
             range: 6,
             maxDate: today,
@@ -43,26 +46,27 @@ $(function(){
             subDomainTextFormat: '%d',
             cellSize: 20,
             domainGutter: 10,
+            legend: [1,3,6,10],
             displayLegend: false,
             tooltip: true,
             previousSelector: '#prev',
             nextSelector: '#next',
             afterLoadPreviousDomain: function(date){
-                if(date < firstDate){   //if we need to queue up older tweet data
-                    var username = $('#username').val();
-                    var url = '/tweets/'+username+'?max_id=' + (first_id - 1);
-                    console.log(url);
-                    $.get(url, function(data){
-                        console.log("hi");
-                        var moreDates = parseTweets(data);
-                        cal.update(moreDates, false, cal.APPEND_ON_UPDATE);
-                        
-                    });
-                        
-                    
+                console.log(date);
+                if(firstDate > date){   //if we need to queue up older tweet data
+                    loadMore();
                 }
             }
         });
+        var loadMore = function(){
+            var username = $('#username').val();
+            generate(username, first_id-1, function(tweets){
+                console.log(tweets);
+                cal.update(tweets, parseTweets, cal.APPEND_ON_UPDATE);
+                first_id = tweets[tweets.length-1].id;
+                console.log(first_id); 
+            });
+        };
 
     };
 

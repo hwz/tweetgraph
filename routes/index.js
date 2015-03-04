@@ -9,8 +9,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/tweets/:user', function(req, res){
-	console.log(req.params);
-	var tweets = twitter.getUserTimeline(req.params.user, function(data){
+	var tweets = twitter.getUserTimeline(req.params.user, req.query.max_id, function(data){
 		res.send(data);
 	});
 })
