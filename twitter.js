@@ -1,30 +1,42 @@
-var oauth2 = require('oauth').OAuth2;
+var OAuth2 = require('oauth').OAuth2;
+var https = require('https');
 var config = require('./config');
 
 var twitter = {};
 
 var consumerKey = process.env.CONSUMER_KEY || config.consumerKey;
 var consumerSecret = process.env.CONSUMER_SECRET || config.consumerSecret;
-var accessToken = process.env.ACCESS_TOKEN || config.accessToken;
-var accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || config.accessTokenSecret;
-
-oauth = new oauth2(consumerKey,
-    consumerSecret, 
-    'https://api.twitter.com/', 
-    null,
-    'oauth2/token', 
-    null
-);
 
 twitter.getUserTimeline = function(user, callback){
-    console.log("access token: "+accessToken);
-    oauth.get("https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name="+user, accessToken, accessTokenSecret, function(e, data){
+    var oauth2 = new OAuth2(consumerKey, consumerSecret, 'https://api.twitter.com/', null, 'oauth2/token', null);
+    oauth2.getOAuthAccessToken('', {
+        'grant_type': 'client_credentials'
+    }, function (e, access_token) {
         if(e){
-            console.log("error");
-            callback([]);
+            console.log(e);
         }
         else{
-            callback(data);
+            var options = {
+                hostname: 'api.twitter.com',
+                path: '/1.1/statuses/user_timeline.json?&screen_name='+user,
+                headers: {
+                    Authorization: 'Bearer ' + access_token
+                }
+            };                          
+
+            https.get(options, function (result) {
+                var buffer = '';
+                result.setEncoding('utf8');
+                result.on('data', function (data) {
+                    buffer += data;
+                });
+                result.on('end', function () {
+                    var tweets = JSON.parse(buffer);
+                    
+                    callback(tweets);
+
+                });
+            });
         }
     });
 }
