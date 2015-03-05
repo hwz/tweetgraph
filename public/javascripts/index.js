@@ -61,8 +61,9 @@ $(function(){
             var username = $('#username').val();
             console.log(firstTweet);
             generate(username, firstTweet.id, function(tweets){
+                cal.options.data = cal.options.data.concat(tweets);
+                cal.update(cal.options.data);
                 firstTweet = tweets[tweets.length-1];
-                cal.update(tweets, parseTweets, cal.APPEND_ON_UPDATE);
             });
         };
 
