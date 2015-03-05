@@ -10,6 +10,7 @@ $(function(){
             url = url+'?max_id=' + max_id;
         }
         $.get(url, function(data){
+            console.log(url);
             callback(data);
         });
 
@@ -25,21 +26,20 @@ $(function(){
                 num++;
             });
         }
-        console.log(num);
         return dates;
     };
-    var render = function(tweets){;
+    var render = function(tweets){
         $('#tweet-heatmap').empty();
         var cal = new CalHeatMap();
-        var first_id = tweets[tweets.length-1].id;
-        var firstDate = new Date(tweets[tweets.length-1].created_at);
+        var firstTweet = tweets[tweets.length-1];
         var today = new Date();
+        var twoMonthsAgo = new Date(today.getFullYear(), today.getMonth()-2, today.getDate());
         cal.init({
             itemSelector: '#tweet-heatmap',
             data: tweets,
             afterLoadData: parseTweets,
-            start: firstDate,
-            range: 6,
+            start: twoMonthsAgo,
+            range: 3,
             maxDate: today,
             domain: 'month',
             subDomain: 'x_day',
@@ -52,19 +52,17 @@ $(function(){
             previousSelector: '#prev',
             nextSelector: '#next',
             afterLoadPreviousDomain: function(date){
-                console.log(date);
-                if(firstDate > date){   //if we need to queue up older tweet data
+                if(new Date(firstTweet.created_at) > date){   //if we need to queue up older tweet data
                     loadMore();
                 }
             }
         });
         var loadMore = function(){
             var username = $('#username').val();
-            generate(username, first_id-1, function(tweets){
-                console.log(tweets);
+            console.log(firstTweet);
+            generate(username, firstTweet.id, function(tweets){
+                firstTweet = tweets[tweets.length-1];
                 cal.update(tweets, parseTweets, cal.APPEND_ON_UPDATE);
-                first_id = tweets[tweets.length-1].id;
-                console.log(first_id); 
             });
         };
 
