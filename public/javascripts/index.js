@@ -63,6 +63,7 @@ $(function(){
             generate(username, firstTweet.id, function(tweets){
                 firstTweet = tweets[tweets.length-1];
                 cal.update(tweets, parseTweets, cal.APPEND_ON_UPDATE);
+                cal.options.data = cal.options.data.concat(tweets);
             });
         };
 
