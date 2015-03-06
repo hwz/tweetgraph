@@ -8,11 +8,12 @@ router.get('/', function(req, res, next) {
 
 });
 
+/*Uses the twitter library to fetch the tweeets and send them back*/
 router.get('/tweets/:user', function(req, res){
 	var tweets = twitter.getUserTimeline(req.params.user, req.query.max_id, function(data){
 		res.send(data);
 	});
-})
+});
 
 
 module.exports = router;
