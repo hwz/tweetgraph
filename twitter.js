@@ -45,7 +45,21 @@ twitter.getUserTimeline = function(user, max_id, callback){
             callback(tweets);
 
         });
+    }).on('error', function(err){
+        console.log(err);
+        callback([]);
     });
+};
+
+twitter.parseTweets = function(tweets){
+    var dates = {};
+    var min_id = "";
+    tweets.forEach(function(tweet){
+        var date = (new Date(tweet.created_at)).getTime();
+        date = (date/1000).toString();
+        dates[date] = 1;
+    });
+    return dates;
 };
 
 module.exports = twitter;

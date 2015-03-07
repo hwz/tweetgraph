@@ -14,34 +14,23 @@ $(function(){
         });
 
     };
-    var parseTweets = function(tweets){
-        var dates = {};
-        if (tweets.length > 0) {
-            $.each(tweets, function(count, tweet){
-                var date = (new Date(tweet.created_at)).getTime();
-                date = (date/1000).toString();
-                dates[date] = 1;
-            });
-        }
-        return dates;
-    };
-    var render = function(tweets){
+    var render = function(data){
         $('#tweet-heatmap').empty();
         var cal = new CalHeatMap();
-        var firstTweet = tweets[tweets.length-1];
+        var minTweet = data.min_tweet;
         var today = new Date();
         var twoMonthsAgo = new Date(today); twoMonthsAgo.setMonth(twoMonthsAgo.getMonth()-2);
 
         var loadMore = function(){
             var username = $('#username').val();
-            generate(username, firstTweet.id_str, function(tweets){
-                if(tweets !== undefined && tweets.length !== 0){
-                    firstTweet = tweets[tweets.length-1];
-                    cal.update(tweets, parseTweets, cal.APPEND_ON_UPDATE);
-                    cal.options.data = cal.options.data.concat(tweets);    
+            generate(username, minTweet.id_str, function(data){
+                if(Object.keys(data).length > 0){   //if data isnt empty
+                    minTweet = data.min_tweet;
+                    $.extend(cal.options.data, data.dates);
+                    cal.update(cal.options.data);
                 }
                 else{
-                    cal.options.minDate = new Date(firstTweet.created_at);
+                    cal.options.minDate = new Date(minTweet.created_at);
                 }
             });
         };
@@ -57,8 +46,7 @@ $(function(){
                 max: "#4682b4",
                 empty: "white"
             },
-            data: tweets,
-            afterLoadData: parseTweets,
+            data: data.dates,
             start: twoMonthsAgo,
             range: 3,
             maxDate: today,
@@ -73,13 +61,13 @@ $(function(){
             nextSelector: '#next',
             afterLoad: function(){
                 $('.control').show();
-                if(new Date(firstTweet.created_at) > twoMonthsAgo){
+                if(new Date(minTweet.created_at) > twoMonthsAgo){
                     loadMore();
                 }
             },
             afterLoadPreviousDomain: function(date){
                 var prevMonth = new Date(date); prevMonth.setMonth(twoMonthsAgo.getMonth()-1);
-                if(new Date(firstTweet.created_at) > prevMonth){   //if we need to queue up older tweet data
+                if(new Date(minTweet.created_at) > prevMonth){   //if we need to queue up older tweet data
                     loadMore();
                 }
             }
