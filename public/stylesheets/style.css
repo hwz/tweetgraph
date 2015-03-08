@@ -1,14 +1,18 @@
 body {
   padding: 50px;
+  background-color: #ffffff !important;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+#userform button {
+	  background-color: #55acee;
+}
 a {
   color: #00B7FF;
 }
-#prev{
-	display: none;
+#tweet-heatmap {
+	padding: 10px 0 20px 0;
 }
-#next{
+.cal-control {
 	display: none;
 }

@@ -1,8 +1,9 @@
 $(function(){
-    $('#generate').click(function(){
+    $('#userform').submit(function(event){
+        event.preventDefault();
         var username = $('#username').val();
-
         generate(username, undefined, render);
+
     });
     var generate = function(username, max_id, callback){
         var url = '/tweets/'+username;
@@ -38,12 +39,12 @@ $(function(){
             itemSelector: '#tweet-heatmap',
             itemName: ["tweet", "tweets"],
             label: {
-                position: "top"
+                position: "top",
             },
             legend: [1,2,4,6,8,10],
             legendColors: {
-                min: "#efefef",
-                max: "#4682b4",
+                min: "#D9EBF9",
+                max: "#0C89E8",
                 empty: "white"
             },
             data: data.dates,
@@ -55,12 +56,13 @@ $(function(){
             subDomainTextFormat: '%d',
             cellSize: 30,
             domainGutter: 10,
-            displayLegend: false,
+            displayLegend: true,
+            legendMargin: [0, 0, 0, 10],
             tooltip: true,
             previousSelector: '#prev',
             nextSelector: '#next',
             afterLoad: function(){
-                $('.control').show();
+                $('.cal-control').show();
                 if(new Date(minTweet.created_at) > twoMonthsAgo){
                     loadMore();
                 }
